@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+<head>
+    <title>My Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="jquery.mobile-1.4.2\jquery.mobile-1.4.2.css">
+    <script src="jquery-1.11.1.min.js"></script>
+    <script src="jquery.mobile-1.4.2\jquery.mobile-1.4.2.js"></script>
+</head>
+<body>
+
+	<script type="text/javascript">
+		
+			$(document).ready(function() {
+			
+				Carregar();
+			});
+			
+			function Carregar(){
+				$.ajax({ 
+					 type: "GET",
+					 dataType: "json",
+					 url: "http://localhost:8080/restee/api/produtos",
+					 success: function(data){        
+						createTable(data.Content);
+					 }
+				 });
+			}
+			
+			function createTable(data){
+				var headers=[""], rows={}
+				
+				var html = "";
+				$.each(data,function(clientIdx,item){
+					html +=   "<li>";
+					html +=      "<a href='javascript:Selecionar(" + item.id + ");'>" + item.nome + "</a>";
+					html +=   "</li>";
+				});
+
+				$('#list').append(html).listview('refresh')
+			
+			}
+			
+			function Selecionar(id){
+				$.ajax({ 
+					 type: "GET",
+					 dataType: "json",
+					 url: "http://localhost:8080/restee/api/produtos/" + id,
+					 success: function(data){        
+						$('#campoID').val(data.Content.id);
+						$('#campoNome').val(data.Content.nome);
+						$('#campoDesc').val(data.Content.descricao);
+						$('#campoQuant').val(data.Content.quantidade);
+						$('#campoValor').val(data.Content.valor);
+					 }
+				 });
+				 
+				 window.location='#two';
+			}
+			
+			function Deletar(){
+			
+				var campoID = $('#campoID').val();
+			
+				$.ajax({ 
+					 type: "GET",
+					 dataType: "json",
+					 url: "http://localhost:8080/restee/api/produtos/delete/" + campoID,
+					 success: function(data){        
+						alert("Registro excluído com sucesso.");
+						$('#list').empty();
+						Carregar();
+						window.location='#one';
+					 }
+				 });
+			}
+			
+			function Novo(){
+			
+				$('#campoID').val("");
+				$('#campoNome').val("");
+				$('#campoDesc').val("");
+				$('#campoQuant').val("");
+				$('#campoValor').val("");
+				
+				window.location='#two';
+			}
+			
+			function Salvar(){
+			
+				var campoID = $('#campoID').val();
+				var campoNome = $('#campoNome').val();
+				var campoDesc = $('#campoDesc').val();
+				var campoQuant = $('#campoQuant').val();
+				var campoValor = $('#campoValor').val();
+			
+				var formData = {"produto.nome":campoNome,"produto.descricao":campoDesc, "produto.quantidade":campoQuant, "produto.valor":campoValor};
+				 
+				 if(campoID != ""){
+					 $.ajax({
+						url: 'http://localhost:8080/restee/api/produtos/' + campoID,
+						type: 'POST',
+						dataType: 'json',
+						mimeType: "multipart/form-data",
+						data: formData,
+						success: function(info) {
+							alert("Registro salvo com sucesso.");
+							$('#list').empty();
+							Carregar();
+							 
+							window.location='#one';
+						}
+					 });
+				 }
+				 else{
+					jQuery.ajax({
+						url: 'http://localhost:8080/restee/api/produtos',
+						type: 'POST',
+						dataType: 'json',
+						mimeType: "multipart/form-data",
+						data: formData,
+						success: function(info) {
+							alert("Registro salvo com sucesso.");
+							$('#list').empty();
+							 Carregar();
+							 
+							 window.location='#one';
+						}
+					 });
+				 }
+			}
+			
+		</script>
+
+    <div data-role="page" id="one">
+ 
+        <div data-role="header">
+            <h1>Aplicação CDW</h1>
+			<a href="#" data-icon="home" data-iconpos="notext" data-direction="reverse" >Novo</a>
+			<a href="javascript:Novo();" data-icon="plus" data-iconpos="notext" >Novo</a>
+        </div><!-- /header -->
+ 
+        <div data-role="content">
+			<ul id="list" data-role="listview" data-filter="true" data-filter-placeholder="Search fruits..." data-inset="true">
+			</ul>
+		
+		</div>
+ 
+    </div><!-- /page -->
+	
+	<div data-role="page" id="two" data-theme="a">
+		<div data-role="header">
+			<h1>Aplicação CDW</h1>
+			<a href="#one" data-icon="carat-l" data-iconpos="notext" data-direction="reverse" >Voltar</a>
+			<a href="javascript:Deletar();" data-icon="delete" data-iconpos="notext" >Excluir</a>
+        </div><!-- /header -->
+ 
+        <div data-role="content">
+            <div class="ui-field-contain">
+				<label for="textinput-1">ID:</label>
+				<input type="text" name="textinput-1" id="campoID" placeholder="" value="" disabled="disabled">
+				<label for="textinput-1">Nome:</label>
+				<input type="text" name="textinput-1" id="campoNome" placeholder="Nome" value="" >
+				<label for="textinput-1">Descrição:</label>
+				<input type="text" name="textinput-1" id="campoDesc" placeholder="Descrição" value="" >
+				<label for="textinput-1">Quantidade:</label>
+				<input type="text" name="textinput-1" id="campoQuant" placeholder="Quantidade" value="" >
+				<label for="textinput-1">Valor:</label>
+				<input type="text" name="textinput-1" id="campoValor" placeholder="Valor" value="" >
+			</div>
+			<div class="ui-field-contain">
+				<p><a href="javascript:Salvar();" data-direction="reverse" class="ui-btn ui-shadow ui-corner-all ui-btn-b">Salvar</a></p>
+			</div>
+			
+        </div><!-- /content -->
+	</div>
+</body>
+</html>
